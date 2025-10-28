@@ -1,12 +1,15 @@
 import { useState } from "react"
+import { v4 } from "uuid"
 
 import inputs from "../Constant/inputs"
-import ContactsList from "./ContactsList"
+import ContactsList from "./ContactsList" 
 
 
 function Contact() {
     const [contacts,setContacts] = useState([])
+    const [alert,setAlert] = useState("")
     const [contact,setContact] = useState({
+        id:"",
         name:"",
         lastName:"",
         email:"",
@@ -20,7 +23,13 @@ function Contact() {
     }
 
     const addHandler = ()=>{
-        setContacts((contacts)=>([...contacts,contact]))
+        if(!contact.name || !contact.lastName || !contact.email || !contact.phone){
+            setAlert("Please Enter Valid Data !!")
+            return
+        }
+        setAlert("")
+        const newContact = {...contact,id:v4()}
+        setContacts((contacts)=>([...contacts,newContact]))
         setContact({
             name:"",
             lastName:"",
@@ -28,12 +37,17 @@ function Contact() {
             phone:"",
         })
     }
+
+    const deleteHandler = (id) => {
+        const newContacts = contacts.filter((contact)=>contact.id !== id)
+        setContacts(newContacts)
+    }
   return (
     <div>
         <div>
             {inputs.map((input,index)=>(
                 <input 
-                key={index }
+                key={index}
                 placeholder={input.placeholder}
                 type={input.type}
                 name={input.name}
@@ -42,7 +56,10 @@ function Contact() {
                  />))}
             <button onClick={addHandler}>Add Contact</button>
         </div>
-        <ContactsList />
+        <div>
+        {alert && <p>{alert}</p>}
+        </div>
+        <ContactsList contacts={contacts} deleteHandler={deleteHandler}/>
     </div>
   )
 }
